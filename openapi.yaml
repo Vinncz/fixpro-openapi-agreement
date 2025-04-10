@@ -24,8 +24,6 @@ paths:
         in: query
         description: A string of characters which uniquely identifies one applicant's application from the next. One is issued after submitting a join form.
         required: false
-        style: form
-        explode: true
         schema:
           type: string
       responses:
@@ -41,6 +39,11 @@ paths:
                     message: You are granted access to the Area. Use the following code and exchange them for access and refresh token.
                     data:
                       authentication_code: qwertyuiop-asdfghjkl-zxcvbnm
+                Mockoon:
+                  value:
+                    message: You are granted access to the Area. Use the following code and exchange them for access and refresh token.
+                    data:
+                      authentication_code: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
         "403":
           $ref: '#/components/responses/Forbidden403'
       security: []
@@ -54,8 +57,6 @@ paths:
         in: query
         description: Referral Tracking Number of the qrcode which points to this url.
         required: false
-        style: form
-        explode: true
         schema:
           type: string
       responses:
@@ -81,6 +82,19 @@ paths:
                       - field_label: whatsapp-registered_phone_number
                         field_type: NUMBER
                       nonce: "12345678901234567890123456789012"
+                Mockoon:
+                  value:
+                    message: All the required fields and a nonce to be used for submission.
+                    data:
+                      area_name: Bali Indah Beach
+                      form_fields:
+                      - field_label: Full Name
+                        field_type: STRING
+                      - field_label: Contactable Phone Number
+                        field_type: NUMBER
+                      - field_label: WhatsApp-registered Phone Number
+                        field_type: NUMBER
+                      nonce: "{{faker 'string.uuid'}}"
         "403":
           $ref: '#/components/responses/Forbidden403'
       security: []
@@ -93,8 +107,6 @@ paths:
         in: query
         description: "A single-use string of characters, issued for some single purpose. One example include this being issued after retrieving form fields."
         required: false
-        style: form
-        explode: true
         schema:
           type: string
       requestBody:
@@ -133,6 +145,12 @@ paths:
                     data:
                       application_expiry_date: 2025-09-21T00:00Z
                       application_id: qwertyuiop-asdfghjkl-zxcvbnm
+                Mockoon:
+                  value:
+                    message: Successfully submitted an application. Use the following string to check periodically of your application status.
+                    data:
+                      application_id: "{{faker 'string.uuid'}}"
+                      application_expiry_date: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=2}}Z"
         "400":
           description: Request does not contain ALL of the required fields.
           content:
@@ -162,7 +180,7 @@ paths:
               examples:
                 Response example:
                   value:
-                    message: string
+                    message: A list containing every Tickets ever raised by the requestor (you).
                     data:
                     - ticket_id: ALSUBVIPOYDSGIUBORWL
                       issue_type: Plumbing
@@ -174,6 +192,32 @@ paths:
                       response_level: "Urgent, emergency"
                       raised_on: 2019-08-24T14:15:22Z
                       status: Open
+                Mockoon:
+                  value:
+                    message: A list containing every Tickets ever raised by the requestor (you).
+                    data:
+                    - ticket_id: "{{faker 'lorem.paragraph'}}"
+                      issue_type: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      response_level: "{{oneOf (array 'Urgent, emergency' 'Urgent' 'Normal')}}"
+                      raised_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-1}}Z"
+                      status: "{{oneOf (array 'Open' 'In Assessment' 'On Progress' 'Work Evaluation' 'Closed' 'Cancelled' 'Rejected')}}"
+                    - ticket_id: "{{faker 'string.uuid'}}"
+                      issue_type: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      response_level: "{{oneOf (array 'Urgent, emergency' 'Urgent' 'Normal')}}"
+                      raised_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=0}}Z"
+                      status: "{{oneOf (array 'Open' 'In Assessment' 'On Progress' 'Work Evaluation' 'Closed' 'Cancelled' 'Rejected')}}"
+                    - ticket_id: "{{faker 'string.uuid'}}"
+                      issue_type: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      response_level: "{{oneOf (array 'Urgent, emergency' 'Urgent' 'Normal')}}"
+                      raised_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-3}}Z"
+                      status: "{{oneOf (array 'Open' 'In Assessment' 'On Progress' 'Work Evaluation' 'Closed' 'Cancelled' 'Rejected')}}"
+                      closed_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-1}}Z"
+                    - ticket_id: "{{faker 'string.uuid'}}"
+                      issue_type: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      response_level: "{{oneOf (array 'Urgent, emergency' 'Urgent' 'Normal')}}"
+                      raised_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-6}}Z"
+                      status: "{{oneOf (array 'Open' 'In Assessment' 'On Progress' 'Work Evaluation' 'Closed' 'Cancelled' 'Rejected')}}"
+                      closed_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-3}}Z"
     post:
       tags: []
       summary: Raises new Issue Ticket associated with a requestor identified through the access token.
@@ -184,7 +228,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TOBEMADE_IssueTicket'
             examples:
-              Request example:
+              Example 1:
                 value:
                   issue_type: Plumbing
                   response_level: "Urgent, emergency"
@@ -195,16 +239,10 @@ paths:
                       latitude: 0
                       longitude: 0
                   supportive_documents:
-                  - id: string
-                    resource_type: Plumbing
-                    resource_name: UNNAMED_RESOURCE
-                    resource_size: 147 KB
-                    owner:
-                      name: string
-                      phone_number: string
-                      email: string
-                      whatsapp-registered_number: string
-                    previewable_on: http://example.com
+                  - resource_type: IMAGE
+                    resource_name: string
+                    resource_size: 0
+                    resource_content: string
       responses:
         "201":
           description: The full object of the raised IssueTicket.
@@ -222,6 +260,15 @@ paths:
                       response_level: "Urgent, emergency"
                       raised_on: 2019-08-24T14:15:22Z
                       status: Open
+                Mockoon:
+                  value:
+                    message: Successfully raised a new ticket
+                    data:
+                      ticket_id: "{{faker 'string.uuid'}}"
+                      issue_type: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      response_level: "{{oneOf (array 'Urgent, emergency' 'Urgent' 'Normal')}}"
+                      raised_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss'}}Z"
+                      status: Open
         "400":
           $ref: '#/components/responses/BadRequest400'
   /ticket/{ticket_id}:
@@ -233,8 +280,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -245,7 +290,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/inline_response_200_4'
               examples:
-                "200":
+                Response example:
                   value:
                     message: The IssueTicket object of the given id.
                     data:
@@ -307,6 +352,68 @@ paths:
                         phone_number: string
                         email: string
                         whatsapp-registered_number: string
+                Mockoon:
+                  value:
+                    message: The IssueTicket object of the given id.
+                    data:
+                      ticket_id: "{{faker 'string.uuid'}}"
+                      issue_type: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      response_level: "{{oneOf (array 'Urgent, emergency' 'Urgent' 'Normal')}}"
+                      raised_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-3}}Z"
+                      status: Open
+                      stated_issue: "{{faker 'lorem.paragraph'}}"
+                      location:
+                        stated_location: "{{faker 'location.secondaryAddress'}}"
+                        gps_location:
+                          latitude: {}
+                          longitude: {}
+                      supportive_documents:
+                      - id: "{{faker 'string.uuid'}}"
+                        resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                        resource_name: "{{faker 'system.commonFileName'}}"
+                        resource_size: "{{faker 'number.int' max=1024}} KB"
+                        previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                      issuer:
+                        name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      logs:
+                      - id: "{{faker 'string.uuid'}}"
+                        owning_ticket_id: "{{faker 'string.uuid'}}"
+                        log_type: "{{oneOf (array 'Assessment' 'Work Progress' 'Work Evaluation Request' 'Work Evaluation' 'Activity')}}"
+                        issuer:
+                          name: "{{faker 'person.fullName'}}"
+                          phone_number: "{{faker 'phone.number' style='international'}}"
+                          email: "{{faker 'internet.email'}}"
+                          whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                        recorded_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' hours=-18}}Z"
+                        news: "{{faker 'lorem.paragraph'}}"
+                        attachment:
+                        - id: "{{faker 'string.uuid'}}"
+                          resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                          resource_name: "{{faker 'system.commonFileName'}}"
+                          resource_size: "{{faker 'number.int' max=4096}} KB"
+                          previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                        - id: "{{faker 'string.uuid'}}"
+                          resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                          resource_name: "{{faker 'system.commonFileName'}}"
+                          resource_size: "{{faker 'number.int' max=1024}} KB"
+                          previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                        actionable:
+                          genus: SEGUE
+                          species: TICKET_LOG
+                          segue_destination: "{{faker 'string.uuid'}}"
+                      handlers:
+                      - name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      - name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      closed_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=-1}}Z"
         "400":
           $ref: '#/components/responses/BadRequest400'
     delete:
@@ -317,8 +424,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -349,8 +454,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       requestBody:
@@ -386,8 +489,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -422,6 +523,70 @@ paths:
                         genus: SEGUE
                         species: TICKET_LOG
                         segue_destination: string
+                Mockoon:
+                  value:
+                    message: A list of every Ticket Logs owned by the specified IssueTicket through its id.
+                    data:
+                    - id: "{{faker 'string.uuid'}}"
+                      owning_ticket_id: ""
+                      log_type: "{{oneOf (array 'Assessment' 'Work Progress' 'Work Evaluation Request' 'Work Evaluation' 'Activity')}}"
+                      issuer:
+                        name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      recorded_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ssXXX' days=-1}}"
+                      news: "{{faker 'lorem.paragraph'}}"
+                      attachment:
+                      - id: "{{faker 'string.uuid'}}"
+                        resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                        resource_name: "{{faker 'system.commonFileName'}}"
+                        resource_size: 147 KB
+                        previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: ""
+                    - id: "{{faker 'string.uuid'}}"
+                      owning_ticket_id: ""
+                      log_type: "{{oneOf (array 'Assessment' 'Work Progress' 'Work Evaluation Request' 'Work Evaluation' 'Activity')}}"
+                      issuer:
+                        name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      recorded_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ssXXX' days=-2}}"
+                      news: "{{faker 'lorem.paragraph'}}"
+                      attachment:
+                      - id: "{{faker 'string.uuid'}}"
+                        resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                        resource_name: "{{faker 'system.commonFileName'}}"
+                        resource_size: 147 KB
+                        previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: ""
+                    - id: "{{faker 'string.uuid'}}"
+                      owning_ticket_id: ""
+                      log_type: "{{oneOf (array 'Assessment' 'Work Progress' 'Work Evaluation Request' 'Work Evaluation' 'Activity')}}"
+                      issuer:
+                        name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      recorded_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ssXXX' days=-3}}"
+                      news: "{{faker 'lorem.paragraph'}}"
+                      attachment:
+                      - id: "{{faker 'string.uuid'}}"
+                        resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                        resource_name: "{{faker 'system.commonFileName'}}"
+                        resource_size: 147 KB
+                        previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: ""
     post:
       tags: []
       summary: Contributes a new Log to an Issue Ticket.
@@ -430,8 +595,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       requestBody:
@@ -472,6 +635,30 @@ paths:
                         genus: SEGUE
                         species: TICKET_LOG
                         segue_destination: string
+                Mockoon:
+                  value:
+                    message: A list of every Ticket Logs owned by the specified IssueTicket through its id.
+                    data:
+                      id: "{{faker 'string.uuid'}}"
+                      owning_ticket_id: ""
+                      log_type: "{{oneOf (array 'Assessment' 'Work Progress' 'Work Evaluation Request' 'Work Evaluation' 'Activity')}}"
+                      issuer:
+                        name: "{{faker 'person.fullName'}}"
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                      recorded_on: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ssXXX' days=-1}}"
+                      news: "{{faker 'lorem.paragraph'}}"
+                      attachment:
+                      - id: "{{faker 'string.uuid'}}"
+                        resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
+                        resource_name: "{{faker 'system.commonFileName'}}"
+                        resource_size: 147 KB
+                        previewable_on: "{{faker 'image.urlPicsumPhotos'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: ""
       security:
       - ApprovalBaseOAuth:
         - crew
@@ -484,8 +671,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -511,8 +696,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       requestBody:
@@ -540,8 +723,6 @@ paths:
       - name: ticket_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -561,8 +742,6 @@ paths:
         in: header
         description: The upper limit of the number of EventNotification objects to be returned. Defaults to 20.
         required: false
-        style: simple
-        explode: false
         schema:
           type: integer
       responses:
@@ -572,7 +751,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200_9'
-              examples: {}
+              examples:
+                Mockoon:
+                  value:
+                    message: "A list of all EventNotifications that were sent to the requestor, up to specified limit."
+                    data:
+                    - notification_id: "{{faker 'string.uuid'}}"
+                      title: "{{faker 'lorem.sentence'}}"
+                      body: "{{faker 'lorem.paragraph'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: "{{faker 'string.uuid'}}"
+                    - notification_id: "{{faker 'string.uuid'}}"
+                      title: "{{faker 'lorem.sentence'}}"
+                      body: "{{faker 'lorem.paragraph'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: "{{faker 'string.uuid'}}"
+                    - notification_id: "{{faker 'string.uuid'}}"
+                      title: "{{faker 'lorem.sentence'}}"
+                      body: "{{faker 'lorem.paragraph'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: "{{faker 'string.uuid'}}"
+                    - notification_id: "{{faker 'string.uuid'}}"
+                      title: "{{faker 'lorem.sentence'}}"
+                      body: "{{faker 'lorem.paragraph'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: "{{faker 'string.uuid'}}"
+                    - notification_id: "{{faker 'string.uuid'}}"
+                      title: "{{faker 'lorem.sentence'}}"
+                      body: "{{faker 'lorem.paragraph'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: "{{faker 'string.uuid'}}"
+                    - notification_id: "{{faker 'string.uuid'}}"
+                      title: "{{faker 'lorem.sentence'}}"
+                      body: "{{faker 'lorem.paragraph'}}"
+                      actionable:
+                        genus: "{{oneOf (array 'SEGUE' 'CONTENT_AVAILABLE' 'INERT')}}"
+                        species: "{{oneOf (array 'TICKET_LOG' 'TICKET' 'INERT')}}"
+                        segue_destination: "{{faker 'string.uuid'}}"
   /calendar:
     get:
       tags: []
@@ -583,8 +808,6 @@ paths:
         in: query
         description: The starting date of every CalendarEvent to query. Defaults to the previous week from request's time.
         required: false
-        style: form
-        explode: true
         schema:
           type: string
           format: date
@@ -592,8 +815,6 @@ paths:
         in: query
         description: The end date of every CalendarEvent to query. Defaults to the next 2 weeks from request's time.
         required: false
-        style: form
-        explode: true
         schema:
           type: string
       responses:
@@ -603,6 +824,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200_10'
+              examples:
+                Response example:
+                  value:
+                    message: Every events that are associated with the requestor (you).
+                    data:
+                    - id: ae37372d-2a94-4dd4-a1b9-7a2221594ec7
+                      title: Stella apparatus asperiores deinde nisi virgo calco valeo bellicus.
+                      description: Coniuratio itaque tutis subseco appello. Summisse alias asperiores. Contigo acceptus cribro.
+                      datetime: 2025-04-10T12:52:50+07:00
+                      duration_in_seconds: "3275"
+                      reminded_enabled: "false"
+                    - id: fda1f1ba-9f32-4ae8-a197-76079ef914c0
+                      title: Adduco placeat defero aestus minima dolorem.
+                      description: Adduco spoliatio cui appositus cunae apparatus. Umquam stillicidium crepusculum tubineus cur velit ver crebro curatio crudelis. Calamitas torqueo vere sequi architecto accusamus illo.
+                      datetime: 2025-04-10T20:22:47+07:00
+                      duration_in_seconds: "31937"
+                      reminded_enabled: "true"
+                Mockoon:
+                  value:
+                    message: string
+                    data:
+                    - id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                      title: string
+                      description: string
+                      datetime: 2019-08-24T14:15:22Z
+                      duration_in_seconds: 0
+                      reminder_enabled: true
         "403":
           $ref: '#/components/responses/Forbidden403'
       security:
@@ -619,8 +867,6 @@ paths:
         in: query
         description: "A single-use, public key of the requestor, used to encrypt each value of the response back."
         required: true
-        style: form
-        explode: true
         schema:
           type: string
       responses:
@@ -642,6 +888,17 @@ paths:
                       STORAGE_BUCKET: BUCKETBUCKETBUCKETBUCKET
                       IS_GCM_ENABLED: true
                       GOOGLE_APP_ID: APPIDAPPIDAPPIDAPPID
+                Mockoon:
+                  value:
+                    message: The GoogleService-Info.plist of FixPro Backend's.
+                    data:
+                      API_KEY: "{{faker 'string.uuid'}}"
+                      GCM_SENDER_ID: "{{faker 'string.uuid'}}"
+                      BUNDLE_ID: "{{faker 'string.uuid'}}"
+                      PROJECT_ID: "{{faker 'string.uuid'}}"
+                      STORAGE_BUCKET: "{{faker 'string.uuid'}}"
+                      IS_GCM_ENABLED: {}
+                      GOOGLE_APP_ID: "{{faker 'string.uuid'}}"
     put:
       tags: []
       summary: Updates FixPro Backend's list regarding the requestor's push notification address.
@@ -686,6 +943,14 @@ paths:
                       join_policy: OPEN
                       member_count: 37
                       pending_member_count: 12
+                Mockoon:
+                  value:
+                    message: The general information about the Area with which the requestor (you) are affiliated with.
+                    data:
+                      name: "{{faker 'location.county'}}"
+                      join_policy: "{{oneOf (array 'OPEN' 'APROVAL-NEEDED' 'CLOSED')}}"
+                      member_count: {}
+                      pending_member_count: {}
         "403":
           $ref: '#/components/responses/Forbidden403ForNonManagement'
       security:
@@ -711,6 +976,12 @@ paths:
                     data:
                       endpoint: http://192.168.10.17:8080/api
                       referral_tracking_identifier: BONDYWENTUPTHEHILLANDDIDN'TCOMEBACK
+                Mockoon:
+                  value:
+                    message: "The string representation of the Area Join Code, which then can be transformed into a qr-code form."
+                    data:
+                      endpoint: "{{faker 'internet.url'}}"
+                      referral_tracking_identifier: "{{faker 'string.uuid'}}"
         "403":
           $ref: '#/components/responses/Forbidden403ForNonManagement'
       security:
@@ -763,6 +1034,100 @@ paths:
                         phone_number: "1242189235214"
                         email: example@gmail.com
                         whatsapp-registered_number: "1242189235214"
+                Mockoon:
+                  value:
+                    message: ""
+                    data:
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
+                    - id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
         "403":
           $ref: '#/components/responses/Forbidden403ForNonManagement'
       security:
@@ -804,8 +1169,6 @@ paths:
       - name: member_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -828,6 +1191,20 @@ paths:
                       member_since: 2019-08-24T14:15:22Z
                       contact_information:
                         phone_number: "102865972938"
+                Mockoon:
+                  value:
+                    message: ""
+                    data:
+                      id: "{{faker 'string.uuid'}}"
+                      name: "{{faker 'person.fullName'}}"
+                      role: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
+                      speciality: "{{oneOf (array 'Plumbing' 'Housekeeping' 'Social' 'Facility' 'Engineering' 'Security')}}"
+                      title: "{{faker 'person.jobTitle'}}"
+                      member_since: "{{dateFormat (faker 'date.past') 'YYYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+                      contact_information:
+                        phone_number: "{{faker 'phone.number' style='international'}}"
+                        email: "{{faker 'internet.email'}}"
+                        whatsapp-registered_number: "{{faker 'phone.number' style='international'}}"
         "403":
           $ref: '#/components/responses/Forbidden403ForNonManagement'
       security:
@@ -841,8 +1218,6 @@ paths:
       - name: member_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -900,8 +1275,6 @@ paths:
       - name: application_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -935,8 +1308,6 @@ paths:
       - name: application_id
         in: path
         required: true
-        style: simple
-        explode: false
         schema:
           type: string
       responses:
@@ -987,6 +1358,15 @@ paths:
                       refresh_token: 1234567890-0987654321-123567890
                       refresh_expiry_interval: 7200
                       token_type: Bearer
+                Mockoon:
+                  value:
+                    message: ""
+                    data:
+                      access_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
+                      access_expiry_interval: {}
+                      refresh_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
+                      refresh_expiry_interval: {}
+                      token_type: Bearer
         "403":
           $ref: '#/components/responses/Forbidden403'
   /auth/refresh:
@@ -1017,6 +1397,15 @@ paths:
                     data:
                       access_token: qazwsxedcrfvtgbyhnujimkolp
                       access_expiry_interval: 7200
+                      token_type: Bearer
+                Mockoon:
+                  value:
+                    message: ""
+                    data:
+                      access_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
+                      access_expiry_interval: {}
+                      refresh_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
+                      refresh_expiry_interval: {}
                       token_type: Bearer
         "403":
           $ref: '#/components/responses/Forbidden403'
@@ -1285,6 +1674,7 @@ components:
         ticket_id:
           type: string
           description: Filled by the server. Client sends empty.
+          format: uuid
           nullable: true
         issue_type:
           $ref: '#/components/schemas/IssueType'
@@ -1527,6 +1917,45 @@ components:
       properties:
         id:
           type: string
+          format: uuid
+        title:
+          type: string
+          x-stoplight:
+            id: lfl0obl4uq1et
+        description:
+          type: string
+          x-stoplight:
+            id: 8b4nk2gajyrd2
+        datetime:
+          type: string
+          format: date-time
+          x-stoplight:
+            id: j1aptx5pzli5k
+        duration_in_seconds:
+          minimum: 0
+          type: integer
+          x-stoplight:
+            id: 2rpw6hfiq5pl1
+        reminder_enabled:
+          type: boolean
+          x-stoplight:
+            id: q72b8cfx02tfc
+      description: ""
+      x-examples:
+        Example:
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          title: Thesis Consultation Session I
+          description: Zoom meeting online room
+          datetime: 2019-08-24T14:15:22Z
+          duration_in_seconds: 1800
+          reminder_enabled: true
+        Mockoon:
+          id: "{{faker 'string.uuid'}}"
+          title: "{{faker 'lorem.sentence'}}"
+          description: "{{faker 'lorem.paragraph'}}"
+          datetime: "{{dateFormat (faker 'date.recent') 'YYY-MM-dd\\'T\\'HH:mm:ssXXX'}}"
+          duration_in_seconds: "{{faker 'number.int' min=0 max=86400}}"
+          reminded_enabled: "{{faker 'datatype.boolean'}}"
     AreaInformation:
       title: AreaInformation
       type: object
@@ -2293,8 +2722,6 @@ components:
       in: query
       description: A string of characters which uniquely identifies one applicant's application from the next. One is issued after submitting a join form.
       required: false
-      style: form
-      explode: true
       schema:
         type: string
     ajc_reference_tracking_identifier:
@@ -2302,8 +2729,6 @@ components:
       in: query
       description: Referral Tracking Number of the qrcode which points to this url.
       required: false
-      style: form
-      explode: true
       schema:
         type: string
     nonce:
@@ -2311,8 +2736,6 @@ components:
       in: query
       description: "A single-use string of characters, issued for some single purpose. One example include this being issued after retrieving form fields."
       required: false
-      style: form
-      explode: true
       schema:
         type: string
   securitySchemes:
