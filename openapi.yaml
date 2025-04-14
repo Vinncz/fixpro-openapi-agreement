@@ -6,8 +6,6 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/yourmom/FPB/1.0.0
   description: SwaggerHub API Auto Mocking
-- url: https://localhost:9191/api/v1
-  description: Mocking Server
 security:
 - ApprovalBaseOAuth:
   - member
@@ -15,20 +13,19 @@ security:
   - management
 paths:
   /entry/check:
-    get:
+    post:
       tags: []
       summary: Checks whether the applicant has their application been given a verdict.
       operationId: checkForEntryVerdict
-      parameters:
-      - name: application_id
-        in: query
-        description: A string of characters which uniquely identifies one applicant's application from the next. One is issued after submitting a join form.
-        required: false
-        schema:
-          type: string
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/entry_check_body'
       responses:
         "200":
-          description: "Returns an authentication_code upon entry approval, null otherwise."
+          description: "Your application has been approved, proceed to exhange for tokens with the given code."
           content:
             application/json:
               schema:
@@ -36,17 +33,23 @@ paths:
               examples:
                 Response example:
                   value:
-                    message: You are granted access to the Area. Use the following code and exchange them for access and refresh token.
+                    message: Your application has been approved. Use the following code to make exchange for tokens.
                     data:
-                      authentication_code: qwertyuiop-asdfghjkl-zxcvbnm
-                Mockoon:
+                      authentication_code: AZQWSXEDCRFVTGBYHUNJIMKOLP
+        "204":
+          description: No approval yet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_204'
+              examples:
+                Response example:
                   value:
-                    message: You are granted access to the Area. Use the following code and exchange them for access and refresh token.
-                    data:
-                      authentication_code: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
+                    message: Your application has not been approved.
+        "400":
+          $ref: '#/components/responses/BadRequest400'
         "403":
-          $ref: '#/components/responses/Forbidden403'
-      security: []
+          $ref: '#/components/responses/RejectedApplication403'
   /entry/form:
     get:
       tags: []
@@ -95,8 +98,23 @@ paths:
                       - field_label: WhatsApp-registered Phone Number
                         field_type: NUMBER
                       nonce: "{{faker 'string.uuid'}}"
+        "400":
+          description: Request wasn't accompanied with a valid referral tracking identifier.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         "403":
-          $ref: '#/components/responses/Forbidden403'
+          description: Area isn't accepting any new members.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_403'
+              examples:
+                Example 1:
+                  value:
+                    message: This area isn't accepting any new members for now.
+                    data: {}
       security: []
     post:
       tags: []
@@ -152,13 +170,7 @@ paths:
                       application_id: "{{faker 'string.uuid'}}"
                       application_expiry_date: "{{dateTimeShift date=(now) format='yyyy-MM-dd\\'T\\'HH:mm:ss' days=2}}Z"
         "400":
-          description: Request does not contain ALL of the required fields.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        "403":
-          description: Request wasn't accompanied with a valid nonce.
+          description: Request does not contain ALL of the required fields and/or a valid-for-submission nonce.
           content:
             application/json:
               schema:
@@ -169,7 +181,13 @@ paths:
       tags: []
       summary: Lists every IssueTickets owned or associated with the requestor; showing only required information.
       operationId: getTickets
-      parameters: []
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A list of every IssueTickets owned or associated with the requestor; showing only the bare-bone information.
@@ -222,6 +240,13 @@ paths:
       tags: []
       summary: Raises new Issue Ticket associated with a requestor identified through the access token.
       operationId: raiseTicket
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -280,6 +305,12 @@ paths:
       - name: ticket_id
         in: path
         required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
         schema:
           type: string
       responses:
@@ -426,6 +457,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A successful closure of the specified ticket.
@@ -454,6 +491,12 @@ paths:
       - name: ticket_id
         in: path
         required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
         schema:
           type: string
       requestBody:
@@ -489,6 +532,12 @@ paths:
       - name: ticket_id
         in: path
         required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
         schema:
           type: string
       responses:
@@ -597,6 +646,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -673,6 +728,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A list of every Handlers who are associated with the specified IssueTicket.
@@ -696,6 +757,12 @@ paths:
       - name: ticket_id
         in: path
         required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
         schema:
           type: string
       requestBody:
@@ -725,6 +792,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: "The pdf file of the report of the specified Ticket, in base64 format."
@@ -738,6 +811,12 @@ paths:
       summary: Lists all EventNotifications whose recipient is the requestor.
       operationId: getInbox
       parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       - name: limit
         in: header
         description: The upper limit of the number of EventNotification objects to be returned. Defaults to 20.
@@ -804,6 +883,12 @@ paths:
       summary: Lists all Events from the team calendar which involves the requestor.
       operationId: getCalendarEvents
       parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       - name: range_lower-bound
         in: query
         description: The starting date of every CalendarEvent to query. Defaults to the previous week from request's time.
@@ -863,6 +948,12 @@ paths:
       summary: Retrieves the Area's copy of GoogleService-Info.plist to enable push notifications on the mobile client.
       operationId: getNotificationPairingInformation
       parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       - name: enkey
         in: query
         description: "A single-use, public key of the requestor, used to encrypt each value of the response back."
@@ -904,6 +995,13 @@ paths:
       summary: Updates FixPro Backend's list regarding the requestor's push notification address.
       description: "A Firebase Cloud Messaging Token or FCM Token works like an address; \nallowing FixPro Backend to ensure that each notifications arrive at their intended recipient.\n\nIf no FCM Token is initially present, it works like the POST method--writing one down."
       operationId: putFCMAddressToken
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -927,6 +1025,13 @@ paths:
       tags: []
       summary: Retrieves general information about the Area where the requestor is affiliated with.
       operationId: getAreaInformation
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: The general information about the Area with which the requestor is affiliated with.
@@ -962,6 +1067,13 @@ paths:
       summary: "Displays the Area Join Code, encoded in QRCode. If there are none active, generate one instead."
       description: Only one Area Join Code can be active at any given time.
       operationId: getAreaJoinCode
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: "The string representation of the Area Join Code, which then can be transformed into a qr-code form."
@@ -991,6 +1103,13 @@ paths:
       tags: []
       summary: Revokes the active Area Join Code.
       operationId: revokeAreaJoinCode
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A successful revoke of the active Area Join Code.
@@ -1012,6 +1131,13 @@ paths:
       tags: []
       summary: Lists out every members enrolled within an Area.
       operationId: getAreaMembers
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A list of every enrolled members of an Area.
@@ -1137,6 +1263,13 @@ paths:
       tags: []
       summary: Admits the specified applicant to an Area.
       operationId: admitsApplicantById
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1169,6 +1302,12 @@ paths:
       - name: member_id
         in: path
         required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
         schema:
           type: string
       responses:
@@ -1220,6 +1359,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A successful kick for the specified member from an Area.
@@ -1241,6 +1386,13 @@ paths:
       tags: []
       summary: Lists out every applicant who requested to join an Area.
       operationId: getPendingMembers
+      parameters:
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: A list of every applicant whose application is awaiting assessment.
@@ -1277,6 +1429,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: The full information regarding the specified applicant's application.
@@ -1308,6 +1466,12 @@ paths:
       - name: application_id
         in: path
         required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
+        required: false
         schema:
           type: string
       responses:
@@ -1367,8 +1531,10 @@ paths:
                       refresh_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
                       refresh_expiry_interval: {}
                       token_type: Bearer
-        "403":
-          $ref: '#/components/responses/Forbidden403'
+        "400":
+          $ref: '#/components/responses/BadRequest400'
+        "401":
+          $ref: '#/components/responses/Unauthorized401'
   /auth/refresh:
     post:
       tags: []
@@ -1407,8 +1573,23 @@ paths:
                       refresh_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
                       refresh_expiry_interval: {}
                       token_type: Bearer
+        "400":
+          $ref: '#/components/responses/BadRequest400'
+        "401":
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden403'
+          description: You aren't allowed to perform any more refreshes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                Example 1:
+                  value:
+                    genus: ILLEGAL
+                    species: CREDENTIALS
+                    message: string
+                    resolution: string
 components:
   schemas:
     ErrorResponse:
@@ -2059,15 +2240,34 @@ components:
       - OPEN
       - APROVAL-NEEDED
       - CLOSED
+    entry_check_body:
+      type: object
+      properties:
+        application_id:
+          type: string
+          x-stoplight:
+            id: 5n5535pwdcstn
     inline_response_200:
       type: object
       properties:
         message:
           type: string
           x-stoplight:
-            id: 6d45s7g3gr6er
+            id: ek1n7dt3etjx9
         data:
           $ref: '#/components/schemas/inline_response_200_data'
+    inline_response_204:
+      type: object
+      properties:
+        message:
+          type: string
+          x-stoplight:
+            id: 7skprtrep5gio
+        data:
+          type: object
+          nullable: true
+          x-stoplight:
+            id: zlij7e0ibrh65
     inline_response_200_1:
       type: object
       properties:
@@ -2077,6 +2277,18 @@ components:
             id: hshkgckug2xyb
         data:
           $ref: '#/components/schemas/inline_response_200_1_data'
+    inline_response_403:
+      type: object
+      properties:
+        message:
+          type: string
+          x-stoplight:
+            id: oz3u5qdfna6a4
+        data:
+          type: object
+          nullable: true
+          x-stoplight:
+            id: x9vnundbii6qp
     entryform_data:
       type: object
       properties:
@@ -2494,9 +2706,8 @@ components:
       properties:
         authentication_code:
           type: string
-          nullable: true
           x-stoplight:
-            id: 4jqib4riomck3
+            id: 88rqmi1cbapoe
     inline_response_200_1_data_form_fields:
       type: object
       properties:
@@ -2652,26 +2863,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-          examples:
-            Example 1:
-              value:
-                genus: MISSING
-                species: ARGUMENTS
-                message: Some fields are missing.
-                resolution: Try to include the XXX and XXX field inside your request.
+          examples: {}
     Unauthorized401:
-      description: No identification.
+      description: Invalid or missing credentials.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
-            Example 1:
+            Response example:
               value:
                 genus: MISSING
                 species: CREDENTIALS
-                message: Access token isn't provided
-                resolution: string
+                message: No credentials were supplied alongside your request.
+                resolution: Recheck your header and try again.
     Forbidden403:
       description: No permission.
       content:
@@ -2716,6 +2921,19 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    RejectedApplication403:
+      description: Rejected application
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Example 1:
+              value:
+                genus: INVALID
+                species: CREDENTIALS
+                message: You can no longer use this credentials as your application has been rejected.
+                resolution: Try reapplying by submitting another form.
   parameters:
     application_id:
       name: application_id
@@ -2735,6 +2953,13 @@ components:
       name: nonce
       in: query
       description: "A single-use string of characters, issued for some single purpose. One example include this being issued after retrieving form fields."
+      required: false
+      schema:
+        type: string
+    Authorization:
+      name: Authorization
+      in: header
+      description: Filled by the value of OAuth 2-compliant access token. Prefixed by 'Bearer '.
       required: false
       schema:
         type: string
