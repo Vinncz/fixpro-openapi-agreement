@@ -317,8 +317,8 @@ paths:
                       location:
                         stated_location: "{{faker 'location.secondaryAddress'}}"
                         gps_location:
-                          latitude: {}
-                          longitude: {}
+                          latitude: {{faker 'location.latitude'}}
+                          longitude: {{faker 'location.longitude'}}
                       supportive_documents:
                       - id: "{{faker 'string.uuid'}}"
                         resource_type: "{{oneOf (array 'IMAGE' 'VIDEO' 'SOUND' 'DOCUMENT' 'ARCHIVE')}}"
@@ -692,12 +692,6 @@ paths:
         required: false
         schema:
           type: string
-      - name: limit
-        in: header
-        description: The upper limit of the number of EventNotification objects to be returned. Defaults to 20.
-        required: false
-        schema:
-          type: integer
       responses:
         "200":
           description: "A list of every EventNotifications ever sent to the requestor, up to specified limit."
@@ -929,8 +923,8 @@ paths:
                     data:
                       name: "{{faker 'location.county'}}"
                       join_policy: "{{oneOf (array 'OPEN' 'APROVAL-NEEDED' 'CLOSED')}}"
-                      member_count: {}
-                      pending_member_count: {}
+                      member_count: {{faker 'number.int' min=24 max=127}}
+                      pending_member_count: {{faker 'number.int' min=2 max=15}}
         "403":
           $ref: '#/components/responses/Forbidden403ForNonManagement'
       security:
@@ -1404,9 +1398,9 @@ paths:
                     message: "Successfully exchanged for tokens. The used authentication_code has now been revoked."
                     data:
                       access_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
-                      access_expiry_interval:  {{faker 'number.int' max=99999}}
+                      access_expiry_interval: {{faker 'number.int' max=99999}}
                       refresh_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
-                      refresh_expiry_interval:  {{faker 'number.int' max=99999}}
+                      refresh_expiry_interval: {{faker 'number.int' max=99999}}
                       token_type: Bearer
                       role_scope: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
         "204":
@@ -1446,12 +1440,12 @@ paths:
                       role_scope: Member
                 Mockoon:
                   value:
-                    message: "A successful refresh. In situation where necessary, the new refresh token may be included aswel."
+                    message: "Successfully refreshed your access token."
                     data:
                       access_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
-                      access_expiry_interval:  {{faker 'number.int' max=99999}}
+                      access_expiry_interval: {{faker 'number.int' max=99999}}
                       refresh_token: "{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}-{{faker 'string.uuid'}}"
-                      refresh_expiry_interval:  {{faker 'number.int' max=99999}}
+                      refresh_expiry_interval: {{faker 'number.int' max=99999}}
                       token_type: Bearer
                       role_scope: "{{oneOf (array 'Member' 'Crew' 'Management')}}"
         "400":
@@ -2417,7 +2411,9 @@ components:
         role:
           $ref: '#/components/schemas/AreaMemberRole'
         specialization:
-          $ref: '#/components/schemas/IssueType'
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueType'
         title:
           type: string
           description: |-
