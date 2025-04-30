@@ -1615,6 +1615,11 @@ components:
             id: mfbjmvhkycqzg
         actionable:
           $ref: '#/components/schemas/Actionable'
+        sent_on:
+          type: string
+          format: date-time
+          x-stoplight:
+            id: uv4qnde1qis83
     IssueTicket:
       title: IssueTicket
       type: object
