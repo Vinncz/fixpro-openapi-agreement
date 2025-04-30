@@ -1613,13 +1613,13 @@ components:
           type: string
           x-stoplight:
             id: mfbjmvhkycqzg
-        actionable:
-          $ref: '#/components/schemas/Actionable'
         sent_on:
           type: string
           format: date-time
           x-stoplight:
             id: uv4qnde1qis83
+        actionable:
+          $ref: '#/components/schemas/Actionable'
     IssueTicket:
       title: IssueTicket
       type: object
@@ -2239,9 +2239,17 @@ components:
       type: object
       properties:
         target_member_id:
-          type: string
+          type: array
+          items:
+            type: string
+            x-stoplight:
+              id: a6i1m2tr5r60q
           x-stoplight:
             id: c8afxe3lwkb5x
+        executive_summary:
+          type: string
+          x-stoplight:
+            id: z05e1z56u0qic
     inline_response_201_2:
       type: object
       properties:
