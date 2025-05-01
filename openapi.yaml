@@ -531,8 +531,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties: {}
+              $ref: '#/components/schemas/TOBEMADE_TicketLog'
       responses:
         "201":
           description: The full object of the made IssueTicketLog.
@@ -2236,6 +2235,7 @@ components:
           x-stoplight:
             id: d86snv98g0x6y
     ticket_id_handlers_body:
+      title: ""
       type: object
       properties:
         target_member_id:
@@ -2658,6 +2658,22 @@ components:
             id: d7uw0zjtl5bbv
         role_scope:
           $ref: '#/components/schemas/AreaMemberRole'
+    TOBEMADE_TicketLog:
+      title: TOBEMADE_TicketLog
+      type: object
+      properties:
+        new:
+          type: string
+          x-stoplight:
+            id: khv0g59kl17xr
+        attachment:
+          type: array
+          items:
+            $ref: '#/components/schemas/TOBEMADE_IssueTicketResource'
+          x-stoplight:
+            id: xcff3x7xpulie
+        log_type:
+          $ref: '#/components/schemas/IssueLogType'
   responses:
     Ok200:
       description: Request performed successfully.
