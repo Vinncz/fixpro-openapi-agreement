@@ -1,0 +1,1546 @@
+openapi: 3.0.0
+servers: []
+info:
+  version: 2.0.0
+  title: FixPro Backend Endpoints Declaration
+  description: With conformance to OAuth2 protocol.
+security:
+  - Authorization:
+      - Member
+      - Crew
+      - Management
+paths:
+  /auth/exchange:
+    post:
+      summary: Exchanges authentication_code for access and refresh tokens.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/oauth-token'
+      operationId: oauthToken
+      security: []
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/oauth-token'
+  /auth/refresh:
+    post:
+      summary: Renews the access_token with a refresh token.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/oauth-refresh'
+      operationId: oauthRefresh
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/oauth-refresh'
+  /entry/check:
+    post:
+      summary: Checks whether the applicant's application has been given a verdict.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/oauth-authorization'
+        '204':
+          $ref: '#/components/responses/oauth-authorization'
+        '400':
+          $ref: '#/components/responses/ERROR-bad-request'
+        '403':
+          $ref: '#/components/responses/ERROR-forbidden'
+      operationId: oauthAuthorization
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/oauth-authorization'
+      parameters: []
+  /entry/form:
+    get:
+      summary: Retrieves the area join form's fields.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/fetch-of-fields-of-the-area-join-form'
+        '400':
+          $ref: '#/components/responses/ERROR-bad-request'
+        '403':
+          $ref: '#/components/responses/area-is-closed'
+      operationId: getAreaJoinForm
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/area_join_form_referral_tracking_identifier'
+    post:
+      summary: Submits the answer to the area join form.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/submission-of-area-join-form-answers'
+        '400':
+          $ref: '#/components/responses/ERROR-bad-request'
+      operationId: postAreaJoinForm
+      requestBody:
+        $ref: '#/components/requestBodies/submission-of-area-join-form-answers'
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/area_join_form_submission_nonce'
+  /tickets:
+    get:
+      summary: Lists every Tickets associated with the requestor while showing only the necessary information.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-lightweight-tickets'
+      operationId: getTickets
+    post:
+      summary: Opens a new Ticket.
+      tags: []
+      responses:
+        '201':
+          $ref: '#/components/responses/newly-made-ticket'
+      operationId: postTicket
+      requestBody:
+        $ref: '#/components/requestBodies/raising-of-ticket'
+  '/ticket/{ticket_id}':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    get:
+      summary: Retrieves a specific Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ticket'
+      operationId: getTicket
+      parameters: []
+    patch:
+      summary: Updates some attributes of a Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ticket'
+      operationId: patchTicket
+      requestBody:
+        $ref: '#/components/requestBodies/updating-ticket-attributes'
+  '/ticket/{ticket_id}/reject':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    post:
+      summary: Rejects a Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/newly-made-ticket-log'
+      operationId: postRejectTicket
+      requestBody:
+        $ref: '#/components/requestBodies/rejecting-a-ticket'
+  '/ticket/{ticket_id}/cancel':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    post:
+      summary: Cancels a Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/newly-made-ticket-log'
+      operationId: postCancelTicket
+      description: ''
+  '/ticket/{ticket_id}/logs':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    get:
+      summary: Lists every Logs associated with the specified Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-logs'
+      operationId: getTicketLogs
+    post:
+      summary: Contributes a new Log to a Ticket.
+      tags: []
+      responses:
+        '201':
+          $ref: '#/components/responses/newly-made-ticket-log'
+      operationId: postTicketLog
+      requestBody:
+        $ref: '#/components/requestBodies/contributing-to-a-ticket'
+      security:
+        - Authorization:
+            - Management
+            - Crew
+  '/ticket/{ticket_id}/handlers':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    get:
+      summary: Lists every Handlers that tend to the specified Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-ticket-handlers'
+      operationId: getTicketHandlers
+    post:
+      summary: Delegates people to tend to the specified Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/newly-made-ticket-log'
+      operationId: postTicketHandlers
+      requestBody:
+        $ref: '#/components/requestBodies/delegating-a-ticket'
+      security:
+        - Authorization:
+            - Management
+  '/ticket/{ticket_id}/print-view/download':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    get:
+      summary: Downloads the PDF of the `Print View` of a Ticket.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ticket-printview-pdf'
+      operationId: getTicketPrintViewDownload
+  /issue-types:
+    get:
+      summary: Lists every Issue Types (or Specialties) that this Area recognize as valid.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-issue-types'
+      operationId: getIssueTypes
+    parameters: []
+    post:
+      summary: Registers a new Issue Type for this Area to recognize.
+      tags: []
+      responses:
+        '201':
+          $ref: '#/components/responses/list-of-renewed-issue-types'
+      operationId: postIssueType
+      security:
+        - Authorization:
+            - Management
+      requestBody:
+        $ref: '#/components/requestBodies/making-of-issue-type'
+  '/issue-type/{type_id}':
+    parameters:
+      - $ref: '#/components/parameters/type_id'
+    delete:
+      summary: Unlists the specified Issue Type.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-renewed-issue-types'
+      operationId: deleteIssueType
+  /area:
+    get:
+      summary: Retrieves general information regarding the Area.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/area-information'
+      operationId: getArea
+  /area/join-policy:
+    get:
+      summary: Retrieves the active Join Policy of this Area.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/area-join-policy'
+      operationId: getAreaJoinPolicy
+    put:
+      summary: Replaces the active Join Policy with the specified one.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/area-join-policy'
+      operationId: putAreaJoinPolicy
+      requestBody:
+        $ref: '#/components/requestBodies/change-of-area-join-policy'
+  /area/members:
+    get:
+      summary: Lists every person that is an active member of this Area.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-area-members'
+      operationId: getAreaMembers
+  '/area/member/{member_id}':
+    parameters:
+      - $ref: '#/components/parameters/member_id'
+    get:
+      summary: Retrieves personal information of a specific Member.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/person'
+      operationId: getAreaMember
+    delete:
+      summary: Revokes the membership of the specified member.
+      tags: []
+      responses:
+        '202':
+          $ref: '#/components/responses/nothing-to-respond-with'
+      operationId: deleteAreaMember
+    put:
+      summary: Renews information regarding an Area member.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/person'
+      operationId: putAreaMember
+      requestBody:
+        $ref: '#/components/requestBodies/updating-of-information-of-area-member'
+  /area/pending-memberships:
+    get:
+      summary: Lists every join application that this Area received.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-area-join-applicant'
+      operationId: getAreaPendingMemberships
+    post:
+      summary: Approves the application of some applicant.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/nothing-to-respond-with'
+      operationId: postAreaPendingMembership
+      requestBody:
+        $ref: '#/components/requestBodies/approving-of-area-join-application'
+  '/area/pending-membership/{application_id}':
+    parameters:
+      - $ref: '#/components/parameters/application_id'
+    get:
+      summary: Retrieves full information regarding the specified applicant.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/area-join-applicant'
+      operationId: getAreaPendingMembership
+    delete:
+      summary: Rejects application of the specified applicant.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/nothing-to-respond-with'
+      operationId: deleteAreaPendingMembership
+  /inbox:
+    get:
+      summary: Lists every Notifications that FixPro Backend has ever send to a Person.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-notifications'
+      operationId: getInbox
+      parameters:
+        - $ref: '#/components/parameters/unsigned_int_maxima'
+    put:
+      summary: Renews the FCM push notification address of a Person.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/nothing-to-respond-with'
+      operationId: putInbox
+      requestBody:
+        $ref: '#/components/requestBodies/updating-of-fcm-token'
+  /calendar:
+    get:
+      summary: Lists every events associated with the Person requesting it; scoped by the arguments provided.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-calendar-events'
+      operationId: getCalendar
+      description: 'Defaults to the range of a week back, and 4 weeks forward.'
+      parameters:
+        - $ref: '#/components/parameters/unsigned_int_minima'
+        - $ref: '#/components/parameters/unsigned_int_maxima'
+  /statistics:
+    get:
+      summary: Lists every metrics that goes toward statistic calculation.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/list-of-statistics'
+      operationId: getStatistics
+      security:
+        - Authorization:
+            - Management
+  /statistics/print-view/download:
+    get:
+      summary: Downloads the PDF of the `Print View` of the statistic page.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/statistics-printview-pdf'
+      operationId: getStatisticsPrintViewDownload
+      security:
+        - Authorization:
+            - Management
+    parameters: []
+components:
+  schemas:
+    token-role:
+      title: token-role
+      enum:
+        - Member
+        - Crew
+        - Management
+      description: Represents the level of access that one can have in using FixPro.
+    error-response:
+      title: ErrorResponse
+      required:
+        - genus
+        - species
+      type: object
+      properties:
+        genus:
+          type: string
+          enum:
+            - MISSING
+            - INVALID
+            - EXPIRED
+            - ILLEGAL
+        species:
+          type: string
+          enum:
+            - CREDENTIALS
+            - ARGUMENTS
+        message:
+          type: string
+        resolution:
+          type: string
+      description: A type which outlines the information of an error to be returned to the requestor.
+      x-examples:
+        Unauthorized401:
+          error_genus: MISSING
+          error_species: CREDENTIALS
+          error_message: Access token wasn't provided.
+          error_resolution: Include them inside your request header.
+        Forbidden403:
+          error_genus: EXPIRED
+          error_species: CREDENTIALS
+          error_message: Expired access token.
+          error_resolution: Use your refresh token to get a new one.
+        BadRequest400:
+          error_genus: ILLEGAL
+          error_species: ARGUMENTS
+          error_message: Argument of 'id' should be string.
+    area-join-form-answer:
+      title: area-join-form-answer
+      type: object
+      properties:
+        field_label:
+          type: string
+        field_value:
+          type: string
+    area-join-policy:
+      title: area-join-policy
+      enum:
+        - OPEN
+        - APROVAL-NEEDED
+        - CLOSED
+    ticket:
+      title: ticket
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        issue_type:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/issue-type'
+        response_level:
+          $ref: '#/components/schemas/response-level'
+        raised_on:
+          $ref: '#/components/schemas/datetime-iso8601'
+        status:
+          $ref: '#/components/schemas/ticket-status'
+        executive_summary:
+          $ref: '#/components/schemas/lorem-sentence'
+        stated_issue:
+          $ref: '#/components/schemas/lorem-paragraph'
+        location:
+          $ref: '#/components/schemas/ticket-location'
+        supportive_documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/supportive-document'
+        issuer:
+          $ref: '#/components/schemas/person'
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ticket-log'
+        handlers:
+          type: array
+          items:
+            $ref: '#/components/schemas/person'
+        closed_on:
+          $ref: '#/components/schemas/optional-datetime-iso8601'
+    LIGHTWEIGHT-ticket:
+      title: LIGHTWEIGHT-ticket
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        issue_type:
+          type: array
+          items:
+            $ref: '#/components/schemas/issue-type'
+        response_level:
+          $ref: '#/components/schemas/response-level'
+        raised_on:
+          $ref: '#/components/schemas/datetime-iso8601'
+        status:
+          $ref: '#/components/schemas/ticket-status'
+        executive_summary:
+          $ref: '#/components/schemas/lorem-sentence'
+        closed_on:
+          $ref: '#/components/schemas/optional-datetime-iso8601'
+    TOBEMADE-ticket:
+      title: TOBEMADE-ticket
+      type: object
+      properties:
+        issue_type:
+          type: array
+          items:
+            $ref: '#/components/schemas/issue-type'
+        response_level:
+          $ref: '#/components/schemas/response-level'
+        executive_summary:
+          $ref: '#/components/schemas/lorem-sentence'
+        stated_issue:
+          $ref: '#/components/schemas/lorem-paragraph'
+        location:
+          $ref: '#/components/schemas/ticket-location'
+        supportive_documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/TOBEMADE-supportive-document'
+    response-level:
+      title: response-level
+      description: 'Can be used to reflect the degree of severity of a Ticket, or to reflect the direness to respond to a Ticket.'
+      enum:
+        - 'Urgent, emergency'
+        - Urgent
+        - Normal
+    ticket-status:
+      title: ticket-status
+      enum:
+        - Open
+        - In Assessment
+        - On Progress
+        - Work Evaluation
+        - Closed
+        - Cancelled
+        - Rejected
+    ticket-location:
+      title: ticket-location
+      type: object
+      properties:
+        stated_location:
+          $ref: '#/components/schemas/lorem-sentence'
+        gps_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              default: -6.201637
+            longitude:
+              type: number
+              format: double
+              default: 106.782636
+    ticket-log:
+      title: ticket-log
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        owning_ticket_id:
+          $ref: '#/components/schemas/uuid'
+        type:
+          $ref: '#/components/schemas/ticket-log-type'
+        issuer:
+          $ref: '#/components/schemas/person'
+        recorded_on:
+          $ref: '#/components/schemas/datetime-iso8601'
+        news:
+          $ref: '#/components/schemas/lorem-paragraph'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/supportive-document'
+        actionable:
+          $ref: '#/components/schemas/actionable'
+    TOBEMADE-ticket-log:
+      title: TOBEMADE-ticket-log
+      type: object
+      x-examples: {}
+      properties:
+        news:
+          $ref: '#/components/schemas/lorem-paragraph'
+        supportive_documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/TOBEMADE-supportive-document'
+        type:
+          $ref: '#/components/schemas/ticket-log-type'
+    ticket-log-type:
+      title: ticket-log-type
+      enum:
+        - Assessment
+        - Work Progress
+        - Work Evaluation Request
+        - Work Evaluation
+        - Activity
+        - Time Extension
+      default: Activity
+    supportive-document:
+      title: supportive-document
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        resource_type:
+          $ref: '#/components/schemas/common-filetype'
+        resource_name:
+          $ref: '#/components/schemas/common-filename'
+        resource_size:
+          type: number
+          default: 127000
+          format: double
+        previewable_on:
+          $ref: '#/components/schemas/picsum-photos'
+    TOBEMADE-supportive-document:
+      title: TOBEMADE-supportive-document
+      type: object
+      properties:
+        resource_type:
+          $ref: '#/components/schemas/common-filetype'
+        resource_name:
+          $ref: '#/components/schemas/common-filename'
+        resource_size:
+          type: number
+          format: double
+        resource_content:
+          type: string
+    person:
+      title: person
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        name:
+          $ref: '#/components/schemas/name'
+        role:
+          $ref: '#/components/schemas/token-role'
+        title:
+          $ref: '#/components/schemas/job-title'
+        specialty:
+          type: array
+          items:
+            $ref: '#/components/schemas/issue-type'
+    actionable:
+      title: actionable
+      type: object
+      properties:
+        genus:
+          enum:
+            - SEGUE
+            - CONTENT_AVAILABLE
+            - INERT
+        species:
+          enum:
+            - TICKET_LOG
+            - TICKET
+            - INERT
+        segue_destination:
+          type: string
+          nullable: true
+    issue-type:
+      title: issue-type
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        name:
+          type: string
+          default: '{{faker ''word.adjective''}}'
+        service_level_agreement_duration_hour:
+          type: integer
+          minimum: 0
+          format: int32
+      description: ''
+    TOBEMADE-issue-type:
+      title: TOBEMADE-issue-type
+      type: object
+      properties:
+        name:
+          type: string
+        service_level_agreement_duration_hour:
+          type: integer
+          format: int32
+          minimum: 0
+    area-information:
+      title: area-information
+      type: object
+      properties:
+        name:
+          type: string
+          default: Bali Indah Resort
+        join_policy:
+          $ref: '#/components/schemas/area-join-policy'
+        member_count:
+          type: integer
+          format: int32
+          minimum: 0
+        pending_member_count:
+          type: integer
+          format: int32
+          minimum: 0
+        issue_type_count:
+          type: integer
+          format: int32
+          minimum: 0
+    notification:
+      title: notification
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        title:
+          $ref: '#/components/schemas/lorem-sentence'
+        body:
+          $ref: '#/components/schemas/lorem-paragraph'
+        sent_on:
+          $ref: '#/components/schemas/datetime-iso8601'
+        actionable:
+          $ref: '#/components/schemas/actionable'
+    entry-application:
+      title: entry-application
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        form_answer:
+          type: array
+          items:
+            $ref: '#/components/schemas/area-join-form-answer'
+    calendar-event:
+      title: calendar-event
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        title:
+          $ref: '#/components/schemas/lorem-sentence'
+        description:
+          $ref: '#/components/schemas/lorem-paragraph'
+        happening_on:
+          $ref: '#/components/schemas/datetime-iso8601'
+        reminder_enabled:
+          type: boolean
+          x-stoplight:
+            id: ajxeeoapfpc36
+          default: false
+        duration_in_seconds:
+          type: integer
+          x-stoplight:
+            id: 6ksq37d8y3n9p
+          format: int32
+          minimum: 0
+          default: 3600
+        saved_on:
+          type: string
+          x-stoplight:
+            id: u67pkdgc0n5mw
+          format: uri
+    statistic-metrics:
+      title: statistic-metrics
+      type: object
+      properties:
+        topic_name:
+          type: string
+        hero_value:
+          type: string
+          x-stoplight:
+            id: k6pjz2nb5hbj9
+        extras:
+          type: array
+          x-stoplight:
+            id: 5vucffufn4bjb
+          items:
+            x-stoplight:
+              id: 713bez46kzw8j
+            type: object
+    _________________:
+      title: ''
+      type: object
+      properties:
+        id:
+          type: string
+    datetime-iso8601:
+      title: datetime
+      type: string
+      default: '{{dateTimeShift date=(now) format=''yyyy-MM-dd\''T\''HH:mm:ssXXX''}}'
+      x-examples:
+        Example 1: {}
+    optional-datetime-iso8601:
+      title: optional-datetime-iso8601
+      type: string
+      default: '{{dateTimeShift date=(now) format=''yyyy-MM-dd\''T\''HH:mm:ssXXX''}}'
+      nullable: true
+    lorem-sentence:
+      title: lorem-sentence
+      type: string
+      default: '{{faker ''lorem.sentence''}}'
+    lorem-paragraph:
+      title: lorem-paragraph
+      type: string
+      default: '{{faker ''lorem.paragraph''}}'
+    common-filename:
+      title: common-filename
+      type: string
+      default: '{{faker ''system.commonFileName''}}'
+    uuid:
+      title: uuid
+      type: string
+      default: '{{faker ''string.uuid''}}'
+      format: uuid
+    name:
+      title: name
+      type: string
+      default: '{{faker ''person.fullName''}}'
+    job-title:
+      title: job-title
+      type: string
+      default: '{{faker ''person.jobTitle''}}'
+    picsum-photos:
+      title: picsum-photos
+      type: string
+      format: uri
+      default: 'https://picsum.photos/1200/1200'
+    common-filetype:
+      title: common-filetype
+      type: string
+      default: '{{faker ''system.commonFileType''}}'
+  securitySchemes:
+    Authorization:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: 'https://localhost/auth/exchange'
+          tokenUrl: 'https://localhost/auth/token'
+          refreshUrl: 'https://localhost/auth/refresh'
+          scopes:
+            Member: ''
+            Crew: ''
+            Management: ''
+  responses:
+    ERROR-bad-request:
+      description: A bad request. Request didn't provide all the required information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-response'
+          examples:
+            Example:
+              value:
+                genus: MISSING
+                species: ARGUMENTS
+                message: Bad request.
+                resolution: Do check the arguments of your request.
+    ERROR-unauthorized:
+      description: Unauthorized. No credentials or a stale one is used by the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-response'
+          examples:
+            Example:
+              value:
+                genus: MISSING
+                species: CREDENTIALS
+                message: Unauthorized. No credentials or a stale one is used by the request.
+                resolution: 'Perform a reauthentication or a refresh, then try again.'
+    ERROR-forbidden:
+      description: Forbidden. The credentials used in the request may not access this resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-response'
+          examples:
+            Example:
+              value:
+                genus: INVALID
+                species: CREDENTIALS
+                message: The credentials used in the request may not access this resource.
+                resolution: Use a different credentials then try again.
+    oauth-token:
+      description: A fresh pair of access and refresh tokens; alongside their respective expiry intervals.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: Did refresh.
+              data:
+                type: object
+                x-stoplight:
+                  id: ksk5dlfc5oqcm
+                properties:
+                  access_token:
+                    $ref: '#/components/schemas/uuid'
+                  access_expiry_interval:
+                    type: integer
+                    x-stoplight:
+                      id: l2x8kbf5vq6gm
+                    default: 1800
+                    format: int32
+                    minimum: 0
+                  refresh_token:
+                    $ref: '#/components/schemas/uuid'
+                  refresh_expiry_interval:
+                    type: integer
+                    x-stoplight:
+                      id: ywchr77y8fjwc
+                    default: 72000
+                    format: int32
+                    minimum: 0
+                  token_type:
+                    type: string
+                    x-stoplight:
+                      id: 4l6r8li7ag6wg
+                    default: Bearer
+                  role_scope:
+                    $ref: '#/components/schemas/token-role'
+    oauth-refresh:
+      description: 'A new acess token, with an optional refresh token; all alongside their respective expiry intervals.'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: Did refresh.
+              data:
+                type: object
+                x-stoplight:
+                  id: ksk5dlfc5oqcm
+                properties:
+                  access_token:
+                    $ref: '#/components/schemas/uuid'
+                  access_expiry_interval:
+                    type: integer
+                    x-stoplight:
+                      id: l2x8kbf5vq6gm
+                    default: 1800
+                    format: int32
+                    minimum: 0
+                  refresh_token:
+                    type: string
+                    x-stoplight:
+                      id: dclcce607q88r
+                    default: '{{faker ''string.uuid''}}'
+                    format: uuid
+                    nullable: true
+                  refresh_expiry_interval:
+                    type: integer
+                    x-stoplight:
+                      id: ywchr77y8fjwc
+                    default: 72000
+                    format: int32
+                    nullable: true
+                  token_type:
+                    type: string
+                    x-stoplight:
+                      id: 4l6r8li7ag6wg
+                    default: Bearer
+                  role_scope:
+                    $ref: '#/components/schemas/token-role'
+          examples: {}
+    oauth-authorization:
+      description: An `authentication_code` indicating approval; or a null due to being not decided upon.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: 'An `authentication_code` that is to be used to exchange for tokens to access the security-scoped endpoints, or null when yours has yet to be decided.'
+              data:
+                type: object
+                x-stoplight:
+                  id: 5uf3rrgnsi4bg
+                properties:
+                  authentication_code:
+                    type: string
+                    x-stoplight:
+                      id: 8brrqkhamzxsm
+                    default: '{{faker ''string.uuid''}}-{{faker ''string.uuid''}}'
+                    format: uuid
+                    nullable: true
+    fetch-of-fields-of-the-area-join-form:
+      description: 'The fields of the Area Join Form, a nonce for submission, and the area name you''re requesting to join into.'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: 'The fields of the Area Join Form, a nonce for submission, and the area name you''re requesting to join into.'
+              data:
+                type: object
+                x-stoplight:
+                  id: vlj0dxv5ws2wj
+                properties:
+                  area_name:
+                    type: string
+                    x-stoplight:
+                      id: frqb3vubfkyua
+                    default: Bali Indah Resort
+                  form_fields:
+                    type: array
+                    x-stoplight:
+                      id: pllqdwzta1mph
+                    items:
+                      x-stoplight:
+                        id: y75vbme0ngn77
+                      type: object
+                      properties:
+                        field_label:
+                          type: string
+                          x-stoplight:
+                            id: d8wsviqp6e7zm
+                          default: Full Name
+                  nonce:
+                    $ref: '#/components/schemas/uuid'
+    submission-of-area-join-form-answers:
+      description: |-
+        An `application_id` that acts like a receipt for submission, and the expiry date of said `application_id`.
+        It is to be assumed that non-acceptance past the specified `application_expiry_date` results the same as being rejected.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: Successfully submitted an application. Use the following string to check periodically of your application status.
+              data:
+                type: object
+                x-stoplight:
+                  id: 5f8jsep6tgg7b
+                properties:
+                  application_id:
+                    $ref: '#/components/schemas/uuid'
+                  application_expiry_date:
+                    $ref: '#/components/schemas/datetime-iso8601'
+    area-is-closed:
+      description: Area's `Area Join Policy` is set to `CLOSED`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error-response'
+          examples:
+            Example 1:
+              value:
+                genus: INVALID
+                species: ARGUMENTS
+                message: Area is currently not accepting any new members.
+                resolution: Check back later.
+    list-of-lightweight-tickets:
+      description: A list of Tickets with minimal information.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: fzumcqyvjfpu9
+                items:
+                  $ref: '#/components/schemas/LIGHTWEIGHT-ticket'
+          examples: {}
+    newly-made-ticket:
+      description: 'The newly raised Ticket, returning only the minimum information.'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/LIGHTWEIGHT-ticket'
+          examples:
+            Example 1:
+              value:
+                message: string
+                data:
+                  id: '{{faker ''string.uuid''}}'
+                  issue_type:
+                    - string
+                  response_level: 'Urgent, emergency'
+                  raised_on: '{{dateTimeShift date=(now) format=''yyyy-MM-dd\''T\''HH:mm:ssXXX''}}'
+                  status: Open
+                  executive_summary: '{{faker ''lorem.sentence''}}'
+                  closed_on: '{{dateTimeShift date=(now) format=''yyyy-MM-dd\''T\''HH:mm:ssXXX''}}'
+    ticket:
+      description: The complete information regarding one specific Ticket.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/ticket'
+          examples: {}
+    nothing-to-respond-with:
+      description: Nothing to respond with.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: Ok.
+              data:
+                type: object
+                x-stoplight:
+                  id: ujlt4rt71nuzq
+                nullable: true
+      headers: {}
+    list-of-logs:
+      description: A list of Logs associated with a specified Ticket.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: cjuv7xhxjaugx
+                items:
+                  $ref: '#/components/schemas/ticket-log'
+          examples: {}
+    newly-made-ticket-log:
+      description: A Log that is created in response to taking an action.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/ticket-log'
+          examples: {}
+      headers: {}
+    list-of-ticket-handlers:
+      description: A list of Handlers that tend to a Ticket.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: 66hgefd4v5sns
+                items:
+                  $ref: '#/components/schemas/person'
+          examples: {}
+    ticket-printview-pdf:
+      description: The binary of the PDF to download.
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    list-of-issue-types:
+      description: A list of issue types.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                default: A list of issue types.
+              data:
+                x-stoplight:
+                  id: u09bltpqn0x31
+                type: array
+                items:
+                  $ref: '#/components/schemas/issue-type'
+    list-of-renewed-issue-types:
+      description: List containing the henceforth-valid Issue Types.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: emv043jh5ey3g
+                items:
+                  $ref: '#/components/schemas/issue-type'
+    list-of-notifications:
+      description: A list of Notifications.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: i7zje8ah089o6
+                items:
+                  $ref: '#/components/schemas/notification'
+    area-information:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/area-information'
+    area-join-policy:
+      description: The currently set policy of this Area.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/area-join-policy'
+    list-of-area-members:
+      description: A list of every people that is a member of this Area.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: 1ex48mb416lnj
+                items:
+                  $ref: '#/components/schemas/person'
+    person:
+      description: A full information regarding a specific Area member.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/person'
+    list-of-area-join-applicant:
+      description: A list of every applicants that has submitted their answer to the entry form.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: zapx7md4rhut9
+                items:
+                  $ref: '#/components/schemas/entry-application'
+    area-join-applicant:
+      description: The answer of the Area Join Form of a specified applicant.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                $ref: '#/components/schemas/entry-application'
+    list-of-calendar-events:
+      description: A list of events from the requestor's calendar.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: o4y85eeby9d1y
+                items:
+                  $ref: '#/components/schemas/calendar-event'
+    list-of-statistics:
+      description: ' A list containing statistics.'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: array
+                x-stoplight:
+                  id: elnj42crsiwu4
+                items:
+                  $ref: '#/components/schemas/statistic-metrics'
+    statistics-printview-pdf:
+      description: The binary of the PDF to download.
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+  requestBodies:
+    oauth-refresh:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              refresh_token:
+                $ref: '#/components/schemas/uuid'
+    oauth-token:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              authentication_code:
+                $ref: '#/components/schemas/uuid'
+    oauth-authorization:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              application_id:
+                $ref: '#/components/schemas/uuid'
+    submission-of-area-join-form-answers:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                x-stoplight:
+                  id: 36y6ttu99lxc1
+                items:
+                  $ref: '#/components/schemas/area-join-form-answer'
+              encryption_key:
+                type: string
+                x-stoplight:
+                  id: eh8nvqaee2uex
+    raising-of-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/TOBEMADE-ticket'
+          examples: {}
+    contributing-to-a-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/TOBEMADE-ticket-log'
+    delegating-a-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              appointed_member-ids:
+                type: array
+                x-stoplight:
+                  id: ppf8kxq6fsj9y
+                items:
+                  $ref: '#/components/schemas/uuid'
+              work_description:
+                $ref: '#/components/schemas/lorem-paragraph'
+              issue_types:
+                type: array
+                items:
+                  $ref: '#/components/schemas/uuid'
+          examples: {}
+    change-of-area-join-policy:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              new_join_policy:
+                $ref: '#/components/schemas/area-join-policy'
+    updating-of-information-of-area-member:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/person'
+    updating-ticket-attributes:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              issue_type:
+                type: array
+                x-stoplight:
+                  id: 71fbj1cw24hhs
+                items:
+                  $ref: '#/components/schemas/uuid'
+              status:
+                $ref: '#/components/schemas/ticket-status'
+              executive_summary:
+                $ref: '#/components/schemas/lorem-sentence'
+              location:
+                $ref: '#/components/schemas/ticket-location'
+    making-of-issue-type:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/TOBEMADE-issue-type'
+    rejecting-a-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              reason:
+                $ref: '#/components/schemas/lorem-paragraph'
+    updating-of-fcm-token:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              new_fcm_token:
+                $ref: '#/components/schemas/uuid'
+    approving-of-area-join-application:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              application_id:
+                $ref: '#/components/schemas/uuid'
+              role:
+                $ref: '#/components/schemas/token-role'
+              specialization:
+                type: array
+                x-stoplight:
+                  id: 5nhdtl1fx1g92
+                items:
+                  $ref: '#/components/schemas/uuid'
+              title:
+                $ref: '#/components/schemas/job-title'
+  parameters:
+    area_join_form_referral_tracking_identifier:
+      name: area_join_form_referral_tracking_identifier
+      in: query
+      required: true
+      schema:
+        type: string
+      description: A unique identifier for each of the qrcode that shows Area Join Code.
+    area_join_form_submission_nonce:
+      name: area_join_form_submission_nonce
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 'A single-use string of characters, issued for some single purpose. One example include this being issued after retrieving form fields.'
+    ticket_id:
+      name: ticket_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The id of the Ticket in focus.
+    type_id:
+      name: type_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The id of an Issue Type in focus.
+    member_id:
+      name: member_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: A string that uniquely identifies everyone that is enrolled in an Area.
+    application_id:
+      name: application_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: A string that acts like a receipt that someone has filled out the Area Join Form.
+    unsigned_int_minima:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        format: int64
+      deprecated: false
+      description: The minima of the scope of the request.
+    unsigned_int_maxima:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        format: int64
+      description: The maxima of the scope of the request.

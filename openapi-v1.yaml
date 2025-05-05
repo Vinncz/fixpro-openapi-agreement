@@ -922,8 +922,8 @@ paths:
                     data:
                       name: "{{faker 'location.county'}}"
                       join_policy: "{{oneOf (array 'OPEN' 'APROVAL-NEEDED' 'CLOSED')}}"
-                      member_count: {{faker 'number.int' min=24 max=127}}
-                      pending_member_count: {{faker 'number.int' min=2 max=15}}
+                      member_count: {}
+                      pending_member_count: {}
         "403":
           $ref: '#/components/responses/Forbidden403ForNonManagement'
       security:
@@ -2250,6 +2250,7 @@ components:
           type: string
           x-stoplight:
             id: z05e1z56u0qic
+      description: ""
     inline_response_201_2:
       type: object
       properties:
@@ -2258,10 +2259,7 @@ components:
           x-stoplight:
             id: yzactdryx9jkd
         data:
-          type: object
-          nullable: true
-          x-stoplight:
-            id: k0n8n51j5bf5w
+          $ref: '#/components/schemas/IssueTicketLog'
     inline_response_200_8:
       type: object
       properties:
