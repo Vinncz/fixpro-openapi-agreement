@@ -319,6 +319,7 @@ paths:
         '200':
           $ref: '#/components/responses/nothing-to-respond-with'
       operationId: deleteAreaPendingMembership
+      description: ''
   /inbox:
     get:
       summary: Lists every Notifications that FixPro Backend has ever send to a Person.
@@ -381,6 +382,7 @@ components:
         - Member
         - Crew
         - Management
+        - Applicant
       description: Represents the level of access that one can have in using FixPro.
     error-response:
       title: ErrorResponse
@@ -441,7 +443,7 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/uuid'
-        issue_type:
+        issue_types:
           type: array
           minItems: 1
           items:
@@ -474,13 +476,15 @@ components:
             $ref: '#/components/schemas/person'
         closed_on:
           $ref: '#/components/schemas/optional-datetime-iso8601'
+      x-examples: {}
+      description: ''
     LIGHTWEIGHT-ticket:
       title: LIGHTWEIGHT-ticket
       type: object
       properties:
         id:
           $ref: '#/components/schemas/uuid'
-        issue_type:
+        issue_types:
           type: array
           items:
             $ref: '#/components/schemas/issue-type'
@@ -498,10 +502,10 @@ components:
       title: TOBEMADE-ticket
       type: object
       properties:
-        issue_type:
+        issue_type_ids:
           type: array
           items:
-            $ref: '#/components/schemas/issue-type'
+            $ref: '#/components/schemas/uuid'
         response_level:
           $ref: '#/components/schemas/response-level'
         executive_summary:
@@ -634,10 +638,26 @@ components:
           $ref: '#/components/schemas/token-role'
         title:
           $ref: '#/components/schemas/job-title'
-        specialty:
+        specialties:
           type: array
           items:
             $ref: '#/components/schemas/issue-type'
+        capabilities:
+          type: array
+          x-stoplight:
+            id: boaw4njsn74p6
+          items:
+            $ref: '#/components/schemas/capability'
+        member_since:
+          $ref: '#/components/schemas/datetime-iso8601'
+        member_until:
+          $ref: '#/components/schemas/optional-datetime-iso8601'
+      x-examples: {}
+    capability:
+      title: capability
+      enum:
+        - InvitePeopleToTicket
+        - IssueSupervisorApproval
     actionable:
       title: actionable
       type: object
@@ -653,8 +673,7 @@ components:
             - TICKET
             - INERT
         segue_destination:
-          type: string
-          nullable: true
+          $ref: '#/components/schemas/ticket'
     issue-type:
       title: issue-type
       type: object
@@ -669,6 +688,15 @@ components:
           minimum: 0
           format: int32
       description: ''
+      x-examples:
+        Plumbing:
+          id: QZWXECRVTYBUNIOMP1A2S3D4F5G6H7J8K90L
+          name: Plumbing
+          service_level_agreement_duration_hour: 48
+        Engineering:
+          id: 1A2S3D4F56G7H8J9K0LZQWXECRVTBYUNMOP
+          name: Engineering
+          service_level_agreement_duration_hour: 64
     TOBEMADE-issue-type:
       title: TOBEMADE-issue-type
       type: object
@@ -1393,18 +1421,31 @@ components:
           schema:
             type: object
             properties:
-              appointed_member-ids:
+              data:
                 type: array
                 x-stoplight:
-                  id: ppf8kxq6fsj9y
+                  id: vmn57jcrg7iwz
                 items:
-                  $ref: '#/components/schemas/uuid'
-              work_description:
-                $ref: '#/components/schemas/lorem-paragraph'
-              issue_types:
-                type: array
-                items:
-                  $ref: '#/components/schemas/uuid'
+                  x-stoplight:
+                    id: 2ir1ltz4kwgw8
+                  type: object
+                  properties:
+                    work_description:
+                      $ref: '#/components/schemas/lorem-paragraph'
+                    appointed_member_ids:
+                      type: array
+                      x-stoplight:
+                        id: 6j1k4xmr2kopo
+                      items:
+                        $ref: '#/components/schemas/uuid'
+                    issue_type:
+                      $ref: '#/components/schemas/uuid'
+                    supportive_documents:
+                      type: array
+                      x-stoplight:
+                        id: 783k8w2ezf7ev
+                      items:
+                        $ref: '#/components/schemas/TOBEMADE-supportive-document'
           examples: {}
     change-of-area-join-policy:
       content:
@@ -1428,7 +1469,7 @@ components:
           schema:
             type: object
             properties:
-              issue_type:
+              issue_type_ids:
                 type: array
                 x-stoplight:
                   id: 71fbj1cw24hhs
@@ -1436,7 +1477,7 @@ components:
                   $ref: '#/components/schemas/uuid'
               status:
                 $ref: '#/components/schemas/ticket-status'
-              executive_summary:
+              stated_issue:
                 $ref: '#/components/schemas/lorem-sentence'
               location:
                 $ref: '#/components/schemas/ticket-location'
