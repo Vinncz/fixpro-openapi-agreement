@@ -117,29 +117,63 @@ paths:
       operationId: patchTicket
       requestBody:
         $ref: '#/components/requestBodies/updating-ticket-attributes'
-  '/ticket/{ticket_id}/reject':
+  '/ticket/{ticket_id}/evaluate':
     parameters:
       - $ref: '#/components/parameters/ticket_id'
     post:
-      summary: Rejects a Ticket.
+      summary: Evaluates the specified ticket.
       tags: []
       responses:
         '200':
           $ref: '#/components/responses/newly-made-ticket-log'
-      operationId: postRejectTicket
+      operationId: postTicketEvaluation
       requestBody:
-        $ref: '#/components/requestBodies/rejecting-a-ticket'
-  '/ticket/{ticket_id}/cancel':
+        $ref: '#/components/requestBodies/evaluation-of-ticket'
+      description: Invoke this endpoint to finalize your evaluation.
+  '/ticket/{ticket_id}/evaluate/request':
     parameters:
       - $ref: '#/components/parameters/ticket_id'
     post:
-      summary: Cancels a Ticket.
+      summary: Requests an evaluation for the given Ticket.
       tags: []
       responses:
         '200':
           $ref: '#/components/responses/newly-made-ticket-log'
-      operationId: postCancelTicket
+      operationId: postTicketEvaluationRequest
+      requestBody:
+        $ref: '#/components/requestBodies/request-of-evaluation-for-ticket'
       description: ''
+      security:
+        - Authorization:
+            - Crew
+  '/ticket/{ticket_id}/close':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    post:
+      summary: Closes the specified ticket gracefully.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/newly-made-ticket-log'
+      operationId: postTicketClosure
+      requestBody:
+        $ref: '#/components/requestBodies/closing-of-ticket'
+      security:
+        - Authorization:
+            - Member
+            - Management
+  '/ticket/{ticket_id}/force-close':
+    parameters:
+      - $ref: '#/components/parameters/ticket_id'
+    post:
+      summary: Closes the specified ticket forcefully.
+      tags: []
+      responses:
+        '200':
+          $ref: '#/components/responses/newly-made-ticket-log'
+      operationId: postTicketForceClosure
+      requestBody:
+        $ref: '#/components/requestBodies/force-closing-of-ticket'
   '/ticket/{ticket_id}/logs':
     parameters:
       - $ref: '#/components/parameters/ticket_id'
@@ -532,6 +566,8 @@ components:
         - In Assessment
         - On Progress
         - Work Evaluation
+        - Quality Control
+        - Owner Evaluation
         - Closed
         - Cancelled
         - Rejected
@@ -591,11 +627,16 @@ components:
       title: ticket-log-type
       enum:
         - Assessment
+        - Invitation
         - Work Progress
+        - Activity
         - Work Evaluation Request
         - Work Evaluation
-        - Activity
         - Time Extension
+        - Owner Evaluation Request
+        - Rejection
+        - Approval
+        - Force Closure
       default: Activity
     supportive-document:
       title: supportive-document
@@ -1415,6 +1456,7 @@ components:
             properties:
               data:
                 $ref: '#/components/schemas/TOBEMADE-ticket-log'
+          examples: {}
     delegating-a-ticket:
       content:
         application/json:
@@ -1453,8 +1495,13 @@ components:
           schema:
             type: object
             properties:
-              new_join_policy:
-                $ref: '#/components/schemas/area-join-policy'
+              data:
+                type: object
+                x-stoplight:
+                  id: izj0u5dtsbnpe
+                properties:
+                  new_join_policy:
+                    $ref: '#/components/schemas/area-join-policy'
     updating-of-information-of-area-member:
       content:
         application/json:
@@ -1523,6 +1570,109 @@ components:
                   $ref: '#/components/schemas/uuid'
               title:
                 $ref: '#/components/schemas/job-title'
+    evaluation-of-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                x-stoplight:
+                  id: 0knq51gnms958
+                properties:
+                  resolveToApprove:
+                    type: boolean
+                    x-stoplight:
+                      id: bb5b39anhsxf7
+                  reason:
+                    type: string
+                    x-stoplight:
+                      id: qn9lt58cqk0k8
+                    nullable: true
+                  supportive_documents:
+                    type: array
+                    x-stoplight:
+                      id: yvvg8stbpaqw4
+                    items:
+                      $ref: '#/components/schemas/TOBEMADE-supportive-document'
+    extending-of-ticket-sla-calculation:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                x-stoplight:
+                  id: svetq1ss3zvlx
+                properties:
+                  reason:
+                    type: string
+                    x-stoplight:
+                      id: zbcypcau4fzi9
+    request-of-evaluation-for-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  remark:
+                    type: string
+                    x-stoplight:
+                      id: qn9lt58cqk0k8
+                    nullable: true
+                  supportive_documents:
+                    type: array
+                    x-stoplight:
+                      id: 7isdy4qsi2a0b
+                    items:
+                      $ref: '#/components/schemas/TOBEMADE-supportive-document'
+    force-closing-of-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                x-stoplight:
+                  id: xd0l5s2ltkthp
+                properties:
+                  reason:
+                    type: string
+                    x-stoplight:
+                      id: jyreh4n02um34
+                  supportive_documents:
+                    type: array
+                    x-stoplight:
+                      id: nfwb2i9fh9a0p
+                    items:
+                      $ref: '#/components/schemas/TOBEMADE-supportive-document'
+    closing-of-ticket:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                x-stoplight:
+                  id: nnhhr1fwtt9q7
+                properties:
+                  reason:
+                    type: string
+                    x-stoplight:
+                      id: byh9cci2019mf
+                  supportive_documents:
+                    type: array
+                    x-stoplight:
+                      id: 7mmqfr15yliiz
+                    items:
+                      $ref: '#/components/schemas/TOBEMADE-supportive-document'
   parameters:
     area_join_form_referral_tracking_identifier:
       name: area_join_form_referral_tracking_identifier
